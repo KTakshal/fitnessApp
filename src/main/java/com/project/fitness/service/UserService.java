@@ -15,7 +15,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     public UserResponse register(RegisterRequest registerRequest) {
-        User user = new User(
+        /*User user = new User(
                 null,
                 registerRequest.getEmail(),
                 registerRequest.getPassword(),
@@ -25,7 +25,15 @@ public class UserService {
                 registerRequest.getUpdatedAt(),
                 List.of(),
                 List.of()
-                );
+                ); */
+
+        User user = User.builder()
+                .email(registerRequest.getEmail())
+                .firstName(registerRequest.getFirstName())
+                .lastName(registerRequest.getLastName())
+                .password(registerRequest.getPassword())
+                .build();
+
         User savedUser = userRepository.save(user);
 
         return mapToResponse(savedUser);

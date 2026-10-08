@@ -18,6 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class) // Enables auditing for this entity
+@Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
