@@ -1,8 +1,11 @@
 package com.project.fitness.service;
 
-import com.project.fitness.DTO.RegisterRequest;
+import com.project.fitness.DTO.RecommendationResponse;
+import com.project.fitness.DTO.UserRegisterRequest;
 import com.project.fitness.DTO.UserResponse;
+import com.project.fitness.model.Recommendation;
 import com.project.fitness.model.User;
+import com.project.fitness.repository.RecommendationRepository;
 import com.project.fitness.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,25 +16,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final RecommendationRepository recommendationRepository;
 
-    public UserResponse register(RegisterRequest registerRequest) {
-        /*User user = new User(
-                null,
-                registerRequest.getEmail(),
-                registerRequest.getPassword(),
-                registerRequest.getFirstName(),
-                registerRequest.getLastName(),
-                registerRequest.getCreatedAt(),
-                registerRequest.getUpdatedAt(),
-                List.of(),
-                List.of()
-                ); */
+    public UserResponse register(UserRegisterRequest userRegisterRequest) {
 
         User user = User.builder()
-                .email(registerRequest.getEmail())
-                .firstName(registerRequest.getFirstName())
-                .lastName(registerRequest.getLastName())
-                .password(registerRequest.getPassword())
+                .email(userRegisterRequest.getEmail())
+                .firstName(userRegisterRequest.getFirstName())
+                .lastName(userRegisterRequest.getLastName())
+                .password(userRegisterRequest.getPassword())
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -44,15 +37,17 @@ public class UserService {
 
         response.setId(savedUser.getId());
         response.setEmail(savedUser.getEmail());
-        response.setPassword(savedUser.getPassword());
         response.setFirstName(savedUser.getFirstName());
         response.setLastName(savedUser.getLastName());
         response.setCreatedAt(savedUser.getCreatedAt());
-        response.setUpdatedAt(savedUser.getUpdatedAt());
         return response;
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> getAllUsers() {
+       List<User> fetchedUser = userRepository.findAll();
+
+        return fetchedUser.stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 }
