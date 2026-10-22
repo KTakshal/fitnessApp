@@ -1,13 +1,14 @@
 package com.project.fitness.service;
 
-import com.project.fitness.DTO.RecommendationResponse;
+import com.project.fitness.DTO.LoginRequest;
 import com.project.fitness.DTO.UserRegisterRequest;
 import com.project.fitness.DTO.UserResponse;
-import com.project.fitness.model.Recommendation;
 import com.project.fitness.model.User;
+import com.project.fitness.model.UserRole;
 import com.project.fitness.repository.RecommendationRepository;
 import com.project.fitness.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,15 +17,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final RecommendationRepository recommendationRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UserResponse register(UserRegisterRequest userRegisterRequest) {
-
+        UserRole role = userRegisterRequest.getRole() !=null ? userRegisterRequest.getRole() :
+                UserRole.USER;
         User user = User.builder()
                 .email(userRegisterRequest.getEmail())
                 .firstName(userRegisterRequest.getFirstName())
                 .lastName(userRegisterRequest.getLastName())
-                .password(userRegisterRequest.getPassword())
+                .password(passwordEncoder.encode(userRegisterRequest.getPassword()))
+                .role(role)
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -32,7 +35,7 @@ public class UserService {
         return mapToResponse(savedUser);
     }
 
-    private UserResponse mapToResponse(User savedUser) {
+    public UserResponse mapToResponse(User savedUser) {
         UserResponse response = new UserResponse();
 
         response.setId(savedUser.getId());
@@ -49,5 +52,16 @@ public class UserService {
         return fetchedUser.stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    public User authenticate(LoginRequest loginRequest) {
+        User user = userRepository.findByEmail(loginRequest.getEmail());
+        if(user == null)
+            throw  new RuntimeException("Invalid Credintials");
+
+        if(!passwordEncoder.matches(loginRequest.getPassword(),user.getPassword())) {
+            throw  new RuntimeException("Invalid Credintials");
+        }
+        return user;
     }
 }
