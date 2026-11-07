@@ -25,6 +25,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeHttpRequest->
                         authorizeHttpRequest.requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/auth/**").permitAll()
+                         .requestMatchers("/swagger-ui.html",
+                                 "/swagger-ui/**",
+                                 "/v3/api-docs/**").permitAll()
                                 .anyRequest().authenticated());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
